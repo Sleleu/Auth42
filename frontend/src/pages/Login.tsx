@@ -2,9 +2,7 @@ import React, { Fragment } from 'react';
 
 const HandleClick =  async () => {
 	if (process.env.REACT_APP_AUTH_URL)
-	{
-		window.open(process.env.REACT_APP_AUTH_URL)
-	}
+		window.location.href = process.env.REACT_APP_AUTH_URL;
 	else
 		console.log('AUTH_URL is undefined');
 }
