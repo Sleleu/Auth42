@@ -1,6 +1,14 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
+interface ApiToken {
+	access_token : string;
+	token_type: string,
+	expires_in: number,
+	scope: string,
+	created_at: number
+}
+
 @Controller('auth')
 export class AuthController {
 	constructor (private authService : AuthService) {}
@@ -11,7 +19,8 @@ export class AuthController {
 			throw new Error('Invalid state');
 		  }
 		// console.log(code);
-		const AccessToken = await this.authService.getToken(code);
-		return `AccessToken : ${AccessToken}`
+		const AccessToken : ApiToken = await this.authService.getToken(code);
+		return `AccessToken : ${AccessToken.access_token}`
+	
 	}
 }
