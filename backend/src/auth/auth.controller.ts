@@ -1,12 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { ApiToken } from './auth.interface';
 
-interface ApiToken {
-	access_token : string;
-	token_type: string,
-	expires_in: number,
-	scope: string,
-	created_at: number
+interface ApiProfile {
+	login : string;
 }
 
 @Controller('auth')
@@ -20,7 +17,10 @@ export class AuthController {
 		  }
 		// console.log(code);
 		const AccessToken : ApiToken = await this.authService.getToken(code);
-		return `AccessToken : ${AccessToken.access_token}`
-	
+		
+		const Profile : ApiProfile = await this.authService.getProfile(AccessToken);
+		
+		return `Profile: ${Profile.login}`
+		
 	}
 }
