@@ -3,6 +3,7 @@ import axios, { AxiosHeaders, AxiosRequestConfig } from 'axios';
 import { ApiToken } from './auth.interface';
 import { response } from 'express';
 import { error } from 'console';
+import { UserDto } from './userDto';
 
 interface ApiProfile {
 	login : string;
@@ -35,22 +36,27 @@ export class AuthService {
 		});
 	}
 
-	async getProfile(accessToken : ApiToken) : Promise<ApiProfile> {
-		
+	async getProfile(accessToken : ApiToken) : Promise<UserDto> {
+		var User : UserDto;
 		const config = {
 			headers : {
 				'Authorization' : `Bearer ${accessToken.access_token}`
 			}
 		}
-		console.log("TOKEN TEST", accessToken.access_token);
-		return axios.get('https://api.intra.42.fr/v2/me', config)
+		// console.log("TOKEN TEST", accessToken.access_token);
+		 axios.get('https://api.intra.42.fr/v2/me', config)
 		.then((response)=> {
-			console.log('response.data : ', response.data);
-			return (response.data);
+			User = {
+				email: response.data.email,
+				login: response.data.login,
+				avatar: response.data.image.link,
+				id: response.data.id}
+			//console.log('response.data : ', response.data);
+			// console.log('User : ', User);
 		})
 		.catch(error => {
 			console.log('An error occured : ', error);
 		});
-		
+		return (User);
 	}
 }
