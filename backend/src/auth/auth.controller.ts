@@ -1,10 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiToken } from './auth.interface';
-
-interface ApiProfile {
-	login : string;
-}
+import { UserDto } from './userDto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,9 +15,12 @@ export class AuthController {
 		// console.log(code);
 		const AccessToken : ApiToken = await this.authService.getToken(code);
 		
-		const Profile : ApiProfile = await this.authService.getProfile(AccessToken);
+		const Profile = await this.authService.getProfile(AccessToken);
 		
-		return `Profile: ${Profile.login}`
+		if (!Profile)
+		  return 'Cannot get Profile from getProfile()';
+		
+		return `Profile: ${Profile.login} <br/> <img src=${Profile.avatar} height="264px" width="356px">`
 		
 	}
 }
