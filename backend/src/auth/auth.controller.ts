@@ -1,14 +1,19 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Response } from 'express';
 import { ApiToken } from './auth.interface';
 import { UserDto } from './userDto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-	constructor (private authService : AuthService) {}
+	constructor (private authService : AuthService,
+				 private configService : ConfigService) {}
 
 	@Get('callback')
-	async getCode(@Query('code') code: string, @Query('state') state: string) {
+	async getCode(@Query('code') code: string,
+				  @Query('state') state: string,
+				  @Res() res: Response) {
 		if (state !== 'test') {
 			throw new Error('Invalid state');
 		  }
@@ -20,7 +25,7 @@ export class AuthController {
 		if (!Profile)
 		  return 'Cannot get Profile from getProfile()';
 		
-		return `Profile: ${Profile.login} <br/> <img src=${Profile.avatar} height="264px" width="356px">`
+		res.redirect(this.configService.get('RESPONSE_URI'));
 		
 	}
 }
