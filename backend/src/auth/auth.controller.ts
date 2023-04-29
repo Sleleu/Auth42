@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, Query, Res, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { ApiToken } from './auth.interface';
@@ -14,8 +14,8 @@ export class AuthController {
 	async getCode(@Query('code') code: string,
 				  @Query('state') state: string,
 				  @Res() res: Response) {
-		if (state !== 'test') {
-			throw new Error('Invalid state');
+		if (state !== 'test' || !code) {
+			throw new HttpException('Invalid code or state', HttpStatus.FORBIDDEN);
 		  }
 		// console.log(code);
 		const AccessToken : ApiToken = await this.authService.getToken(code);
