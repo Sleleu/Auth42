@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from "@nestjs/passport";
 
 export class JwtGuard extends AuthGuard('jwt') {
@@ -7,11 +7,11 @@ export class JwtGuard extends AuthGuard('jwt') {
 		const request = context.switchToHttp().getRequest();
 		//console.log("test request.cookie in JwtGuard() : ", request.cookies)
 		if (!request.cookies) {
-		  throw new Error('Missing cookie-parser middleware');
+		  throw new ForbiddenException('Missing cookie-parser middleware');
 		}
 		const token = request.cookies.Authorization;
 		if (!token) {
-		  throw new Error('Missing Authorization cookie');
+		  throw new ForbiddenException('Missing Authorization cookie');
 		}
 		request.headers.authorization = `Bearer ${token}`;
 		return request;

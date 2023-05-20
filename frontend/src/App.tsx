@@ -3,17 +3,20 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import PrivateRoute from './PrivateRoute';
 
 function App() {
   return (
-    <Router>
-      <div>
+      <Router>
         <Routes>
-          <Route path="/" Component={() => <Login/>} />
-          <Route path="/home" Component={() => <Home/>} />
+          <Route path="/" element={<Login />} />
+          <Route path='/home'
+          element={
+          <PrivateRoute>
+           <Home />
+          </PrivateRoute>}/>
         </Routes>
-      </div>
-    </Router>
+      </Router>
   );
 }
 

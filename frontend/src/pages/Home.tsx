@@ -12,15 +12,6 @@ export interface User {
     state: string;
     avatar: string;
   }
-  
-  export interface rankData {
-    id: number;
-    username: string;
-    elo: number;
-    win: number;
-    loose: number;
-    rank?: number;
-  }
 
 function Home() {
 
