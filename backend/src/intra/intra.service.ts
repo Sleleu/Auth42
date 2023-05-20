@@ -113,22 +113,25 @@ export class IntraService {
 		return token;
 	  }
 
-	  async isTwoFAEnabled(userId: number) {
+	async isTwoFAEnabled(userId: number) {
 		const user = await this.prismaService.user.findUnique({
 		  where: { id: userId },
 		});
-		return user?.TwoFASecret != null;
+		if (user.TwoFAenabled === true)
+			return true;
+		else
+			return false;
 	  }
 	  
 
-	  async setTwoFASecret(secret: string, userId: number) {
-    	const user = await this.prismaService.user.update({
+	async setTwoFASecret(secret: string, userId: number) {
+    	await this.prismaService.user.update({
       	where: { id: userId },
       	data: { TwoFASecret : secret },
 		});
 	}
 
-	  async generateTwoFactorAuthenticationSecret(login : string, userId : number) {
+	async generateTwoFactorAuthenticationSecret(login : string, userId : number) {
 		const secret = authenticator.generateSecret()
 	
 		const otpauthUrl = authenticator.keyuri(login, 'ft_transcendence', secret);
@@ -143,7 +146,7 @@ export class IntraService {
 		}
 	  }
 	  
-	  async verifyTwoFactorAuthenticationToken(userId: number, token: string) {
+	async verifyTwoFactorAuthenticationToken(userId: number, token: string) {
 		const user = await this.prismaService.user.findUnique({
 		  where: { id: userId },
 		});
@@ -160,10 +163,17 @@ export class IntraService {
 		});
 	  }
 
-	  async enableTwoFA(userId : number) {
+	async enableTwoFA(userId : number) {
 		await this.prismaService.user.update({
       	where: { id: userId },
-      	data: { TwoFAenabled : true },
+		data : { TwoFAenabled : true }
+		});
+	  }
+
+	async disableTwoFA(userId : number) {
+		await this.prismaService.user.update({
+      	where: { id: userId },
+		data : { TwoFAenabled : false }
 		});
 	  }
 }
