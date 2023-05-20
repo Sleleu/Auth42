@@ -1,56 +1,79 @@
-import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-import { ApiToken } from './auth.interface';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthDto } from './dto/auth.dto';
+import * as argon from 'argon2';
+import { Prisma } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-	constructor (private configService : ConfigService) {}
-	async getToken(code : string) {
-		// console.log(code);
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) { }
 
-		const data = {
-			grant_type : 'authorization_code',
-			client_id : this.configService.get('CLIENT_ID'),
-			client_secret : this.configService.get('CLIENT_SECRET'),
-			code : code,
-			redirect_uri : this.configService.get('REDIRECT_URI'),
-		};
-		const config = {
-		  headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		  },
-		};
-		return axios.post('https://api.intra.42.fr/oauth/token', data, config)
-		.then((response)=> {
-		  // console.log(response.data)
-		  return (response.data);
-		})
-		.catch(error => {
-		  console.error(error);
-		});
-	}
+  async signup(dto: AuthDto) {
+    // generer le hash
+    const hash = await argon.hash(dto.password);
 
-	async getProfile(accessToken : ApiToken) {
-		const config = {
-			headers : {
-				'Authorization' : `Bearer ${accessToken.access_token}`
-			}
-		}
-		// console.log("TOKEN TEST", accessToken.access_token);
-		return axios.get('https://api.intra.42.fr/v2/me', config)
-		.then((response)=> {
-			const User = {
-				email: response.data.email,
-				login: response.data.login,
-				avatar: response.data.image.link,
-				id: response.data.id}
-			//console.log('response.data : ', response.data);
-			// console.log('User : ', User);
-			return User;
-		})
-		.catch(error => {
-			console.log('An error occured : ', error);
-		});
-	}
+    // tenter de save l'user
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          username: dto.username,
+          hash,
+        },
+      });
+
+      // Retourne un token avec l'id et l'username
+      return this.signToken(user.id, user.username);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException('Username already taken');
+        }
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async signin(dto: AuthDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username: dto.username,
+      },
+    });
+
+    if (!user || !user.hash) // Si user n'existe pas ou si il n'y a pas de hash (profil 42)
+		throw new ForbiddenException('Incorrect username or password');
+
+    // compare password
+    const passwordMatch = await argon.verify(user.hash, dto.password);
+    if (!passwordMatch)
+      throw new ForbiddenException('Incorrect username or password');
+
+    return this.signToken(user.id, user.username);
+  }
+
+  async signToken(
+    userId: number,
+    username: string,
+  ): Promise<string> {
+    const payload = {
+      sub: userId,
+      username: username,
+    };
+
+    const secret = this.config.get('JWT_SECRET'); // On recupere la variable d'env
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '1days', // Temps avant que le token expire
+      secret: secret,
+    });
+
+    return token;
+  }
 }
