@@ -33,3 +33,17 @@ export async function logout() {
       throw new Error(`Failed to log out: ${response.statusText}`);
     }
   }
+
+  export const enableTwoFA = async () => {
+    const response = await fetch("http://localhost:5000/intra/enable-2fa", {
+      method: "POST",
+      credentials: 'include'
+    });
+  
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Failed to enable two-factor authentication');
+    }
+  };
+  
