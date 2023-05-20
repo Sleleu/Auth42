@@ -1,46 +1,34 @@
-import React, { Component } from 'react';
 import { useState, useEffect } from 'react';
-
-export interface User {
-    username: string;
-    id: number;
-    elo: number;
-    win: number;
-    loose: number;
-    createAt: string;
-    updateAt: string;
-    state: string;
-    avatar: string;
-  }
+import { getUserProfile, User } from '../components/Api';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<Partial<User>>({});
 
-    const [user, setUser] = useState<User>({ username: '', id: -1, elo: -1, win: -1, loose: -1, createAt: '', updateAt: '', state: 'inexistant', avatar:'' })
-    const api = async () => {
-        const data = await fetch("http://localhost:5000/users/profile", { 
-			method: "GET",
-			credentials: 'include'})
-        const userProfile = await data.json();
-        console.log('user in api', userProfile)
-		return userProfile;
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userProfile = await getUserProfile();
+        setUser(userProfile);
+      } catch (error) {
+        console.error(error);
+        navigate('/');
+      }
+    };
+    fetchData();
+  }, [navigate]);
 
-    useEffect(() => {
-        const getUser = async () => {
-            const userFromServer = await api()
-            setUser(userFromServer)
-        }
-        getUser()
-    }, [])
-
-    return (
-            <>
-            <p>
-                <h1> Login : {user.username} </h1>
-                <img src={user.avatar} />
-            </p>
-            </>
-    );
+  return (
+    <>
+      {user.username && (
+        <div>
+          <h1>Login: {user.username}</h1>
+          {user.avatar && <img src={user.avatar} alt="User Avatar" />}
+        </div>
+      )}
+    </>
+  );
 }
 
 export default Home;
