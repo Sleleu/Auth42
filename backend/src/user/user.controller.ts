@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtGuard } from 'src/auth/guard';
 import { UserService } from './user.service';
@@ -26,7 +26,7 @@ export class UserController {
 		return (req.user);
 	}
 
-	@Get('logout')
+	@Post('logout')
 	logout(@Res() res: Response) {
 	  res.clearCookie('Authorization');
 	  return res.status(200).send({ message: 'User logged out' });
