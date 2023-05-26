@@ -138,14 +138,12 @@ export class IntraService {
 	
 		await this.setTwoFASecret(secret, userId);
 
-		const qrCodeImage = await QRCode.toDataURL(otpauthUrl);
-		
 		return {
 		  secret,
-		  qrCodeImage,
+		  otpauthUrl
 		}
 	  }
-	  
+
 	async verifyTwoFactorAuthenticationToken(userId: number, token: string) {
 		const user = await this.prismaService.user.findUnique({
 		  where: { id: userId },

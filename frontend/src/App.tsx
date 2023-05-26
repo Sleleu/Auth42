@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import PrivateRoute from './PrivateRoute';
 import Verify2FA from './pages/Verify2FA';
+import TwoFASetup from './pages/Generate2FA';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
            <Home />
           </PrivateRoute>}/>
           <Route path="/verify-2fa" Component={Verify2FA} />
+          <Route path="/TwoFASetup" element={<TwoFASetup />}/>
         </Routes>
       </Router>
   );

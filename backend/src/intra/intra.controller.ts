@@ -83,12 +83,12 @@ export class IntraController {
       	access_token: sessionId
     	},
   	});
-
+	console.log('Passage dans generate et user = ', user);
   	if (!user) {
     	throw new HttpException('Invalid session', HttpStatus.UNAUTHORIZED);
   	}
-  	const { secret, qrCodeImage } = await this.intraService.generateTwoFactorAuthenticationSecret(user.username, user.id);
-  	return { secret, qrCodeImage };
+  	const { secret, otpauthUrl } = await this.intraService.generateTwoFactorAuthenticationSecret(user.username, user.id);
+  	return { secret, otpauthUrl };
 	}
 
 	@Get('verify-2fa-code')

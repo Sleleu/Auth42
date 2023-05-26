@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getUserProfile, User, logout } from '../components/Api';
 import { useNavigate } from 'react-router-dom';
 import { enableTwoFA } from '../components/Api';
+import TwoFASetup from './Generate2FA';
 
 function Home() {
   const navigate = useNavigate();
@@ -39,7 +40,8 @@ function Home() {
 	try {
 		await enableTwoFA();
 		alert('Two-factor authentication enabled successfully');
-	} catch (error) {
+    navigate('/TwoFASetup');
+  } catch (error) {
 		console.error(error);
 		alert('Failed to enable two-factor authentication');
 	}
@@ -55,7 +57,7 @@ function Home() {
           {user.avatar && <img src={user.avatar} alt="User Avatar" />}
         </div>
         <button onClick={handleEnableTwoFA}>Enable Two Factor Authentication</button>
-        <button onClick={handleLogout}>Logout</button>
+       <button onClick={handleLogout}>Logout</button>
       </>
     );
   }
